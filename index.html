@@ -8,8 +8,10 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Google Fonts: Fredoka & Quicksand for a cozy, cute aesthetic -->
+  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Supabase JS Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
     tailwind.config = {
@@ -47,7 +49,6 @@
     h1, h2, h3, h4, .font-heading {
       font-family: 'Fredoka', sans-serif;
     }
-    /* Custom Scrollbar */
     ::-webkit-scrollbar {
       width: 8px;
     }
@@ -57,9 +58,6 @@
     ::-webkit-scrollbar-thumb {
       background: #F2BED1;
       border-radius: 9999px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #E07A5F;
     }
     .craft-card {
       transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -74,8 +72,6 @@
   <!-- Header / Navigation -->
   <header class="sticky top-0 z-30 bg-craft-cream/90 backdrop-blur-md border-b-2 border-craft-pink shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-      
-      <!-- Logo -->
       <a href="#" onclick="showSection('store')" class="flex items-center gap-3 group">
         <div class="w-12 h-12 rounded-2xl bg-craft-rose text-white flex items-center justify-center text-2xl shadow-md group-hover:rotate-12 transition-transform duration-300">
           <i class="fa-solid fa-scissors"></i>
@@ -86,19 +82,15 @@
         </div>
       </a>
 
-      <!-- Navigation Actions -->
       <div class="flex items-center gap-3 sm:gap-4">
-        <!-- Store / View Mode Button -->
         <button id="nav-store-btn" onclick="showSection('store')" class="hidden px-4 py-2 rounded-xl text-sm font-bold bg-craft-sage text-craft-darksage hover:bg-craft-darksage hover:text-white transition-colors flex items-center gap-2">
           <i class="fa-solid fa-store"></i> <span class="hidden sm:inline">Storefront</span>
         </button>
 
-        <!-- Admin Dashboard Button -->
         <button id="nav-admin-btn" onclick="handleAdminNav()" class="px-4 py-2 rounded-xl text-sm font-bold bg-craft-pink text-craft-text hover:bg-craft-rose hover:text-white transition-colors flex items-center gap-2">
           <i class="fa-solid fa-user-shield"></i> <span id="admin-btn-label" class="hidden sm:inline">Admin Portal</span>
         </button>
 
-        <!-- Cart Button -->
         <button onclick="toggleCartModal(true)" class="relative p-3 rounded-2xl bg-craft-butter text-craft-text hover:bg-amber-200 transition-all shadow-sm">
           <i class="fa-solid fa-basket-shopping text-xl"></i>
           <span id="cart-badge" class="absolute -top-1 -right-1 bg-craft-darkrose text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center border-2 border-white shadow scale-0 transition-transform">0</span>
@@ -117,68 +109,43 @@
 
   <!-- MAIN STOREFRONT CONTAINER -->
   <main id="store-section" class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    
-    <!-- Hero Banner -->
     <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-craft-pink via-craft-cream to-craft-sage p-8 sm:p-12 mb-10 border-2 border-craft-pink/50 shadow-sm">
       <div class="relative z-10 max-w-2xl">
         <span class="inline-block px-3 py-1 bg-white/80 rounded-full text-xs font-bold text-craft-darkrose uppercase tracking-wider mb-3 shadow-sm">🌱 Handcrafted with Love</span>
-        <h1 class="text-3xl sm:text-5xl font-extrabold text-craft-text mb-4 leading-tight">Cozy Handmade Crafts & DIY Video Tutorials</h1>
-        <p class="text-craft-subtle text-base sm:text-lg mb-6 leading-relaxed">Discover custom crocheted plushies, aesthetic tote bags, bead keychains, and full video guides for every piece so you can learn at home!</p>
-        <div class="flex flex-wrap gap-3">
-          <a href="#product-grid" class="px-6 py-3 bg-craft-darkrose text-white rounded-2xl font-bold hover:bg-opacity-90 shadow-lg shadow-craft-darkrose/20 transition-all">Explore Collection</a>
-          <button onclick="filterCategory('Pattern')" class="px-6 py-3 bg-white text-craft-text rounded-2xl font-bold hover:bg-craft-butter shadow-sm transition-all border border-craft-pink">DIY Sewing Patterns</button>
-        </div>
+        <h1 class="text-3xl sm:text-5xl font-extrabold text-craft-text mb-4 leading-tight">Cozy Handmade Crafts & Crochet Set Items</h1>
+        <p class="text-craft-subtle text-base sm:text-lg mb-6 leading-relaxed">Choose between ready-made finished pieces or DIY crochet sets with complete video tutorials!</p>
       </div>
-      <!-- Decorative Icons Background -->
       <div class="absolute -right-8 -bottom-8 opacity-15 text-craft-darkrose pointer-events-none select-none">
         <i class="fa-solid fa-heart text-[220px]"></i>
       </div>
     </div>
 
-    <!-- Filters & Search Bar -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-      <!-- Categories -->
-      <div class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar" id="category-pills">
-        <!-- Javascript populates category buttons -->
-      </div>
-
-      <!-- Search Input -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0" id="category-pills"></div>
       <div class="relative min-w-[260px]">
-        <input type="text" id="search-input" onkeyup="handleSearch()" placeholder="Search plushies, bags, patterns..." 
-               class="w-full pl-11 pr-4 py-2.5 rounded-2xl bg-white border border-craft-pink focus:outline-none focus:ring-2 focus:ring-craft-rose text-sm shadow-sm">
+        <input type="text" id="search-input" onkeyup="handleSearch()" placeholder="Search items..." class="w-full pl-11 pr-4 py-2.5 rounded-2xl bg-white border border-craft-pink focus:outline-none focus:ring-2 focus:ring-craft-rose text-sm shadow-sm">
         <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-craft-subtle"></i>
       </div>
     </div>
 
-    <!-- Products Grid -->
-    <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      <!-- Product items rendered dynamically via JS -->
-    </div>
+    <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
 
-    <!-- Empty State -->
     <div id="empty-store-state" class="hidden text-center py-16">
       <div class="w-20 h-20 bg-craft-pink rounded-full flex items-center justify-center mx-auto mb-4 text-craft-darkrose text-3xl">
         <i class="fa-solid fa-box-open"></i>
       </div>
       <h3 class="text-xl font-bold text-craft-text mb-1">No items found</h3>
-      <p class="text-craft-subtle text-sm">Try searching for something else or clearing filters.</p>
     </div>
   </main>
 
-  <!-- ADMIN DASHBOARD CONTAINER (Hidden by default) -->
-  <main id="admin-section" class="hidden flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    
-    <!-- Admin Header -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pb-6 border-b border-craft-pink">
+  <!-- ADMIN DASHBOARD CONTAINER -->
+  <main id="admin-section" class="hidden flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-craft-pink">
       <div>
-        <div class="flex items-center gap-3">
-          <h1 class="text-3xl font-extrabold text-craft-text">Admin Dashboard</h1>
-          <span class="px-3 py-1 bg-craft-darksage text-white text-xs font-bold rounded-full">Live Operations</span>
-        </div>
-        <p class="text-craft-subtle text-sm mt-1">Manage shop inventory, track customer orders, and update video tutorials.</p>
+        <h1 class="text-3xl font-extrabold text-craft-text">Admin Dashboard</h1>
+        <p class="text-craft-subtle text-sm mt-1">Manage shop inventory and customer orders in real-time via Supabase.</p>
       </div>
-
-      <div class="flex items-center gap-3">
+      <div class="flex flex-wrap items-center gap-3">
         <button onclick="openAddProductModal()" class="px-5 py-2.5 bg-craft-darkrose text-white rounded-2xl font-bold hover:bg-opacity-90 shadow-md text-sm flex items-center gap-2">
           <i class="fa-solid fa-plus"></i> Add New Product
         </button>
@@ -188,166 +155,103 @@
       </div>
     </div>
 
-    <!-- Stats Row -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-      <div class="bg-white p-6 rounded-3xl border border-craft-pink shadow-sm flex items-center justify-between">
-        <div>
-          <span class="text-xs font-bold text-craft-subtle uppercase tracking-wider block mb-1">Total Revenue</span>
-          <span id="stat-revenue" class="text-2xl font-extrabold text-craft-text">$0.00</span>
-        </div>
-        <div class="w-12 h-12 bg-craft-sage text-craft-darksage rounded-2xl flex items-center justify-center text-xl">
-          <i class="fa-solid fa-sack-dollar"></i>
-        </div>
-      </div>
-      <div class="bg-white p-6 rounded-3xl border border-craft-pink shadow-sm flex items-center justify-between">
-        <div>
-          <span class="text-xs font-bold text-craft-subtle uppercase tracking-wider block mb-1">Total Orders</span>
-          <span id="stat-orders" class="text-2xl font-extrabold text-craft-text">0</span>
-        </div>
-        <div class="w-12 h-12 bg-craft-pink text-craft-darkrose rounded-2xl flex items-center justify-center text-xl">
-          <i class="fa-solid fa-receipt"></i>
-        </div>
-      </div>
-      <div class="bg-white p-6 rounded-3xl border border-craft-pink shadow-sm flex items-center justify-between">
-        <div>
-          <span class="text-xs font-bold text-craft-subtle uppercase tracking-wider block mb-1">Products Listed</span>
-          <span id="stat-products" class="text-2xl font-extrabold text-craft-text">0</span>
-        </div>
-        <div class="w-12 h-12 bg-craft-butter text-amber-700 rounded-2xl flex items-center justify-center text-xl">
-          <i class="fa-solid fa-boxes-stacked"></i>
+    <!-- Product Inventory Section -->
+    <div>
+      <h2 class="text-xl font-bold text-craft-text mb-4"><i class="fa-solid fa-box text-craft-darkrose mr-2"></i> Product Inventory</h2>
+      <div class="bg-white rounded-3xl border border-craft-pink shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-craft-pink/40 text-craft-text text-xs uppercase font-bold tracking-wider border-b border-craft-pink">
+                <th class="p-4">Product</th>
+                <th class="p-4">Category</th>
+                <th class="p-4">Configured Types & Prices</th>
+                <th class="p-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-inventory-table" class="divide-y divide-craft-pink/30 text-sm"></tbody>
+          </table>
         </div>
       </div>
     </div>
 
-    <!-- Admin Tabs -->
-    <div class="flex border-b border-craft-pink mb-6 gap-6">
-      <button onclick="switchAdminTab('orders')" id="tab-btn-orders" class="pb-3 text-sm font-bold border-b-2 border-craft-darkrose text-craft-darkrose">
-        <i class="fa-solid fa-list-check mr-2"></i> Orders Management
-      </button>
-      <button onclick="switchAdminTab('inventory')" id="tab-btn-inventory" class="pb-3 text-sm font-bold text-craft-subtle hover:text-craft-text border-b-2 border-transparent">
-        <i class="fa-solid fa-cubes mr-2"></i> Product Catalog
-      </button>
-    </div>
-
-    <!-- Orders Tab Content -->
-    <div id="admin-tab-orders" class="bg-white rounded-3xl border border-craft-pink shadow-sm overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="bg-craft-pink/40 text-craft-text text-xs uppercase font-bold tracking-wider border-b border-craft-pink">
-              <th class="p-4">Order ID & Date</th>
-              <th class="p-4">Customer Details</th>
-              <th class="p-4">Items</th>
-              <th class="p-4">Total & Payment</th>
-              <th class="p-4">Status</th>
-              <th class="p-4 text-right">Action</th>
-            </tr>
-          </thead>
-          <tbody id="admin-orders-table" class="divide-y divide-craft-pink/30 text-sm">
-            <!-- Dynamic order rows -->
-          </tbody>
-        </table>
-      </div>
-      <div id="empty-orders-state" class="hidden text-center py-12">
-        <p class="text-craft-subtle font-medium">No customer orders placed yet.</p>
+    <!-- Customer Orders Section -->
+    <div>
+      <h2 class="text-xl font-bold text-craft-text mb-4"><i class="fa-solid fa-clipboard-list text-craft-darkrose mr-2"></i> Customer Orders</h2>
+      <div class="bg-white rounded-3xl border border-craft-pink shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-craft-sage/40 text-craft-text text-xs uppercase font-bold tracking-wider border-b border-craft-pink">
+                <th class="p-4">Order ID & Date</th>
+                <th class="p-4">Items Ordered</th>
+                <th class="p-4">Total Amount</th>
+                <th class="p-4 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="admin-orders-table" class="divide-y divide-craft-pink/30 text-sm"></tbody>
+          </table>
+        </div>
       </div>
     </div>
-
-    <!-- Inventory Tab Content -->
-    <div id="admin-tab-inventory" class="hidden bg-white rounded-3xl border border-craft-pink shadow-sm overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="bg-craft-pink/40 text-craft-text text-xs uppercase font-bold tracking-wider border-b border-craft-pink">
-              <th class="p-4">Product</th>
-              <th class="p-4">Category</th>
-              <th class="p-4">Price</th>
-              <th class="p-4">Tutorial Video</th>
-              <th class="p-4 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="admin-inventory-table" class="divide-y divide-craft-pink/30 text-sm">
-            <!-- Dynamic inventory rows -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-
   </main>
 
   <!-- FOOTER -->
   <footer class="bg-white border-t border-craft-pink mt-12 py-8">
-    <div class="max-w-7xl mx-auto px-4 text-center sm:flex sm:justify-between sm:items-center">
-      <div class="mb-4 sm:mb-0">
-        <p class="font-heading font-bold text-craft-text text-lg">Little Craft 1998</p>
-        <p class="text-xs text-craft-subtle">Bringing handmade warmth to your doorstep.</p>
-      </div>
-      <div class="flex justify-center gap-6 text-craft-subtle text-lg">
-        <a href="#" class="hover:text-craft-darkrose transition-colors"><i class="fa-brands fa-instagram"></i></a>
-        <a href="#" class="hover:text-craft-darkrose transition-colors"><i class="fa-brands fa-youtube"></i></a>
-        <a href="#" class="hover:text-craft-darkrose transition-colors"><i class="fa-brands fa-pinterest"></i></a>
-        <a href="#" class="hover:text-craft-darkrose transition-colors"><i class="fa-brands fa-tiktok"></i></a>
-      </div>
+    <div class="max-w-7xl mx-auto px-4 text-center">
+      <p class="font-heading font-bold text-craft-text text-lg">Little Craft 1998</p>
+      <p class="text-xs text-craft-subtle">Bringing handmade warmth to your doorstep.</p>
     </div>
   </footer>
 
-  <!-- ==================== MODALS & DRAWERS ==================== -->
-
-  <!-- 1. PRODUCT DETAIL & TUTORIAL MODAL -->
+  <!-- MODALS -->
+  <!-- 1. PRODUCT DETAIL & CUSTOMIZATION MODAL -->
   <div id="product-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
     <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative border-2 border-craft-pink p-6 sm:p-8">
-      
       <button onclick="closeProductModal()" class="absolute top-4 right-4 w-10 h-10 bg-craft-pink/50 hover:bg-craft-pink rounded-full flex items-center justify-center text-craft-text transition-colors">
         <i class="fa-solid fa-xmark text-lg"></i>
       </button>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div>
-          <img id="modal-img" src="" alt="" class="w-full h-72 object-cover rounded-2xl border border-craft-pink shadow-sm">
-        </div>
-
+        <div id="modal-img-container"></div>
         <div class="flex flex-col justify-between">
           <div>
             <span id="modal-category" class="inline-block px-3 py-1 bg-craft-sage text-craft-darksage text-xs font-bold rounded-full mb-2"></span>
             <h2 id="modal-title" class="text-2xl font-bold text-craft-text mb-2"></h2>
             <p id="modal-price" class="text-2xl font-extrabold text-craft-darkrose mb-4"></p>
-            <p id="modal-desc" class="text-craft-subtle text-sm leading-relaxed mb-6"></p>
+            <p id="modal-desc" class="text-craft-subtle text-sm leading-relaxed mb-4"></p>
+            
+            <div id="modal-options-container" class="space-y-3 mb-6 bg-craft-cream p-4 rounded-2xl border border-craft-pink"></div>
           </div>
 
           <div class="flex flex-col gap-3">
-            <button id="modal-add-cart-btn" class="w-full py-3 bg-craft-rose text-white rounded-2xl font-bold hover:bg-craft-darkrose transition-colors shadow-md flex items-center justify-center gap-2">
+            <button onclick="addCustomizedToCart()" class="w-full py-3 bg-craft-rose text-white rounded-2xl font-bold hover:bg-craft-darkrose transition-colors shadow-md flex items-center justify-center gap-2">
               <i class="fa-solid fa-basket-shopping"></i> Add to Cart
             </button>
-            <button id="modal-buy-now-btn" class="w-full py-3 bg-craft-darkrose text-white rounded-2xl font-bold hover:bg-opacity-90 transition-colors shadow-md flex items-center justify-center gap-2">
-              <i class="fa-solid fa-bolt"></i> Buy Now (Express Checkout)
+            <button onclick="buyNowAction()" class="w-full py-3 bg-craft-darkrose text-white rounded-2xl font-bold hover:bg-opacity-90 shadow-md flex items-center justify-center gap-2">
+              <i class="fa-solid fa-bag-shopping"></i> Buy Now
             </button>
           </div>
         </div>
       </div>
 
       <!-- Video Tutorial Section -->
-      <div id="modal-video-container" class="mt-8 border-t border-craft-pink pt-6">
+      <div id="modal-video-container" class="mt-8 border-t border-craft-pink pt-6 hidden">
         <div class="flex items-center gap-2 mb-4">
           <i class="fa-brands fa-youtube text-red-500 text-2xl"></i>
           <h3 class="text-lg font-bold text-craft-text">Craft Tutorial & Making Video</h3>
         </div>
         <div class="relative w-full aspect-video rounded-2xl overflow-hidden border border-craft-pink shadow-inner bg-black">
-          <iframe id="modal-youtube-iframe" class="w-full h-full" src="" title="YouTube video tutorial" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          <iframe id="modal-youtube-iframe" class="w-full h-full" src="" title="YouTube video tutorial" frameborder="0" allowfullscreen></iframe>
         </div>
       </div>
-
     </div>
   </div>
 
   <!-- 2. CART SIDEBAR DRAWER -->
   <div id="cart-drawer" class="fixed inset-0 z-50 pointer-events-none">
-    <!-- Backdrop -->
-    <div id="cart-backdrop" onclick="toggleCartModal(false)" class="absolute inset-0 bg-black/40 backdrop-blur-xs opacity-0 transition-opacity duration-300 pointer-events-auto hidden"></div>
-    
-    <!-- Panel -->
+    <div id="cart-backdrop" onclick="toggleCartModal(false)" class="absolute inset-0 bg-black/40 opacity-0 transition-opacity duration-300 pointer-events-auto hidden"></div>
     <div id="cart-panel" class="absolute top-0 right-0 h-full w-full max-w-md bg-craft-cream shadow-2xl transform translate-x-full transition-transform duration-300 pointer-events-auto flex flex-col justify-between border-l-2 border-craft-pink">
-      
-      <!-- Cart Header -->
       <div class="p-6 border-b border-craft-pink flex items-center justify-between bg-white">
         <div class="flex items-center gap-3">
           <i class="fa-solid fa-basket-shopping text-craft-darkrose text-xl"></i>
@@ -357,472 +261,249 @@
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
-
-      <!-- Cart Items List -->
-      <div id="cart-items-container" class="flex-grow overflow-y-auto p-6 space-y-4">
-        <!-- Rendered items -->
-      </div>
-
-      <!-- Cart Footer / Checkout CTA -->
+      <div id="cart-items-container" class="flex-grow overflow-y-auto p-6 space-y-4"></div>
       <div class="p-6 border-t border-craft-pink bg-white">
-        <div class="space-y-2 mb-4">
-          <div class="flex justify-between text-sm text-craft-subtle">
-            <span>Subtotal</span>
-            <span id="cart-subtotal">$0.00</span>
-          </div>
-          <div class="flex justify-between text-sm text-craft-subtle">
-            <span>Shipping</span>
-            <span class="text-craft-darksage font-semibold">Calculated at Checkout</span>
-          </div>
-          <div class="flex justify-between text-base font-bold text-craft-text pt-2 border-t border-dashed border-craft-pink">
-            <span>Estimated Total</span>
-            <span id="cart-total" class="text-craft-darkrose text-xl">$0.00</span>
-          </div>
+        <div class="flex justify-between text-base font-bold text-craft-text mb-4">
+          <span>Total</span>
+          <span id="cart-total" class="text-craft-darkrose text-xl">0₫</span>
         </div>
-
-        <button onclick="openCheckoutModal()" id="checkout-btn" disabled class="w-full py-3.5 bg-craft-darkrose text-white rounded-2xl font-bold hover:bg-opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-craft-darkrose/20 flex items-center justify-center gap-2">
-          Proceed to Checkout <i class="fa-solid fa-arrow-right text-xs"></i>
-        </button>
+        <button onclick="checkoutOrder()" id="checkout-btn" class="w-full py-3.5 bg-craft-darkrose text-white rounded-2xl font-bold hover:bg-opacity-90 shadow-lg">Complete Checkout</button>
       </div>
-
     </div>
   </div>
 
-  <!-- 3. EXPRESS CHECKOUT MODAL (No Account Required) -->
-  <div id="checkout-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
-    <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative border-2 border-craft-pink p-6 sm:p-8">
-      
-      <button onclick="closeCheckoutModal()" class="absolute top-4 right-4 w-10 h-10 bg-craft-pink/50 hover:bg-craft-pink rounded-full flex items-center justify-center text-craft-text">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-
-      <div class="mb-6">
-        <span class="px-3 py-1 bg-craft-butter text-amber-800 text-xs font-bold rounded-full uppercase tracking-wide">Express Order</span>
-        <h2 class="text-2xl font-bold text-craft-text mt-1">Shipping & Payment Details</h2>
-        <p class="text-xs text-craft-subtle">No account needed! Fill in details below so we can ship your items.</p>
-      </div>
-
-      <form id="checkout-form" onsubmit="handlePlaceOrder(event)" class="space-y-4">
-        
-        <!-- Contact Information -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-bold text-craft-text mb-1">Full Name *</label>
-            <input type="text" id="cust-name" required placeholder="e.g., Emily Watson" class="w-full px-4 py-2.5 rounded-xl bg-craft-cream border border-craft-pink focus:outline-none focus:ring-2 focus:ring-craft-rose text-sm">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-craft-text mb-1">Phone Number *</label>
-            <input type="tel" id="cust-phone" required placeholder="e.g., +1 (555) 019-2834" class="w-full px-4 py-2.5 rounded-xl bg-craft-cream border border-craft-pink focus:outline-none focus:ring-2 focus:ring-craft-rose text-sm">
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-craft-text mb-1">Shipping Address *</label>
-          <textarea id="cust-address" required rows="2" placeholder="Street address, Apartment, City, Postal Code" class="w-full px-4 py-2.5 rounded-xl bg-craft-cream border border-craft-pink focus:outline-none focus:ring-2 focus:ring-craft-rose text-sm"></textarea>
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-craft-text mb-1">Order Notes (Optional)</label>
-          <input type="text" id="cust-notes" placeholder="Gift message or delivery instructions..." class="w-full px-4 py-2.5 rounded-xl bg-craft-cream border border-craft-pink focus:outline-none focus:ring-2 focus:ring-craft-rose text-sm">
-        </div>
-
-        <!-- Payment Method Selection -->
-        <div class="pt-2">
-          <label class="block text-xs font-bold text-craft-text mb-2">Select Payment Method</label>
-          <div class="grid grid-cols-3 gap-3">
-            <label class="border-2 border-craft-pink rounded-2xl p-3 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-craft-pink/20 transition-all has-[:checked]:border-craft-darkrose has-[:checked]:bg-craft-pink/30">
-              <input type="radio" name="payment_method" value="COD" checked class="sr-only" onchange="updatePaymentView()">
-              <i class="fa-solid fa-hand-holding-dollar text-xl text-craft-darkrose mb-1"></i>
-              <span class="text-xs font-bold text-craft-text">Cash on Delivery</span>
-            </label>
-
-            <label class="border-2 border-craft-pink rounded-2xl p-3 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-craft-pink/20 transition-all has-[:checked]:border-craft-darkrose has-[:checked]:bg-craft-pink/30">
-              <input type="radio" name="payment_method" value="Bank QR" class="sr-only" onchange="updatePaymentView()">
-              <i class="fa-solid fa-qrcode text-xl text-craft-darksage mb-1"></i>
-              <span class="text-xs font-bold text-craft-text">Bank Transfer QR</span>
-            </label>
-
-            <label class="border-2 border-craft-pink rounded-2xl p-3 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-craft-pink/20 transition-all has-[:checked]:border-craft-darkrose has-[:checked]:bg-craft-pink/30">
-              <input type="radio" name="payment_method" value="Card" class="sr-only" onchange="updatePaymentView()">
-              <i class="fa-solid fa-credit-card text-xl text-amber-600 mb-1"></i>
-              <span class="text-xs font-bold text-craft-text">Credit Card</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- QR Code Container Preview -->
-        <div id="qr-payment-info" class="hidden p-4 rounded-2xl bg-craft-sage/50 border border-craft-darksage/30 flex flex-col sm:flex-row items-center gap-4">
-          <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=LittleCraft1998-Payment" alt="QR Code" class="w-24 h-24 rounded-xl border bg-white p-1">
-          <div class="text-xs text-craft-text space-y-1">
-            <p class="font-bold">Scan with your Banking App</p>
-            <p>Account: <strong>Little Craft 1998 Ltd</strong></p>
-            <p>Bank: <strong>Creative Craft Bank (1998-0012)</strong></p>
-            <p class="text-craft-subtle">Order will be processed immediately upon transfer confirmation.</p>
-          </div>
-        </div>
-
-        <!-- Order Summary Box -->
-        <div class="bg-craft-cream p-4 rounded-2xl border border-craft-pink text-xs space-y-1.5">
-          <div class="flex justify-between">
-            <span>Items Count:</span>
-            <span id="checkout-count" class="font-bold">0</span>
-          </div>
-          <div class="flex justify-between">
-            <span>Flat Shipping Fee:</span>
-            <span class="font-bold">$4.00</span>
-          </div>
-          <div class="flex justify-between text-sm font-extrabold text-craft-darkrose pt-2 border-t border-craft-pink">
-            <span>Total Amount Due:</span>
-            <span id="checkout-total">$0.00</span>
-          </div>
-        </div>
-
-        <button type="submit" class="w-full py-4 bg-craft-darkrose text-white rounded-2xl font-bold hover:bg-opacity-90 shadow-lg shadow-craft-darkrose/20 text-base">
-          Confirm & Place Order
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- 4. ORDER SUCCESS CONFIRMATION MODAL -->
-  <div id="success-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-3xl max-w-md w-full p-8 text-center border-2 border-craft-pink shadow-2xl">
-      <div class="w-16 h-16 bg-craft-sage text-craft-darksage rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
-        <i class="fa-solid fa-heart"></i>
-      </div>
-      <h2 class="text-2xl font-bold text-craft-text mb-2">Thank You for Your Order!</h2>
-      <p class="text-xs text-craft-subtle mb-4">Your order ID is <strong id="success-order-id" class="text-craft-darkrose">#LC-0000</strong>. We are hand-packing your craft items now!</p>
-      
-      <div class="bg-craft-cream p-4 rounded-2xl text-left text-xs space-y-2 mb-6 border border-craft-pink">
-        <p><strong>Shipping To:</strong> <span id="success-cust-name"></span></p>
-        <p><strong>Phone:</strong> <span id="success-cust-phone"></span></p>
-        <p><strong>Payment:</strong> <span id="success-payment-type"></span></p>
-      </div>
-
-      <button onclick="closeSuccessModal()" class="w-full py-3 bg-craft-rose text-white rounded-2xl font-bold hover:bg-craft-darkrose transition-colors">
-        Back to Shopping
-      </button>
-    </div>
-  </div>
-
-  <!-- 5. ADMIN LOGIN MODAL -->
+  <!-- 3. ADMIN LOGIN MODAL -->
   <div id="admin-login-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
     <div class="bg-white rounded-3xl max-w-sm w-full p-6 sm:p-8 border-2 border-craft-pink shadow-2xl relative">
       <button onclick="closeAdminLoginModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-craft-pink/50 flex items-center justify-center text-craft-text">
         <i class="fa-solid fa-xmark"></i>
       </button>
-
       <div class="text-center mb-6">
-        <div class="w-12 h-12 bg-craft-pink text-craft-darkrose rounded-2xl flex items-center justify-center mx-auto mb-2 text-xl">
-          <i class="fa-solid fa-user-lock"></i>
-        </div>
         <h2 class="text-xl font-bold text-craft-text">Admin Portal Login</h2>
-        <p class="text-xs text-craft-subtle mt-1">Default Demo Login: <strong>admin</strong> / <strong>Nguyet9898@@@</strong></p>
+        <p class="text-xs text-craft-subtle mt-1">Default: <strong>admin</strong> / <strong>Nguyet9898@@@</strong></p>
       </div>
-
       <form onsubmit="handleAdminLogin(event)" class="space-y-4">
-        <div>
-          <label class="block text-xs font-bold text-craft-text mb-1">Username</label>
-          <input type="text" id="admin-user" required value="admin" class="w-full px-4 py-2.5 rounded-xl bg-craft-cream border border-craft-pink focus:outline-none focus:ring-2 focus:ring-craft-rose text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-craft-text mb-1">Password</label>
-          <input type="password" id="admin-pass" required value="admin123" class="w-full px-4 py-2.5 rounded-xl bg-craft-cream border border-craft-pink focus:outline-none focus:ring-2 focus:ring-craft-rose text-sm">
-        </div>
-        <button type="submit" class="w-full py-3 bg-craft-darkrose text-white rounded-2xl font-bold hover:bg-opacity-90 transition-all text-sm shadow-md">
-          Log In as Admin
-        </button>
+        <input type="text" id="admin-user" required value="admin" class="w-full px-4 py-2.5 rounded-xl bg-craft-cream border border-craft-pink text-sm">
+        <input type="password" id="admin-pass" required value="Nguyet9898@@@" class="w-full px-4 py-2.5 rounded-xl bg-craft-cream border border-craft-pink text-sm">
+        <button type="submit" class="w-full py-3 bg-craft-darkrose text-white rounded-2xl font-bold text-sm">Log In</button>
       </form>
     </div>
   </div>
 
-  <!-- 6. ADD PRODUCT MODAL (Admin) -->
+  <!-- 4. ADD / EDIT PRODUCT MODAL -->
   <div id="add-product-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
     <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 border-2 border-craft-pink shadow-2xl relative max-h-[90vh] overflow-y-auto">
       <button onclick="closeAddProductModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-craft-pink/50 flex items-center justify-center text-craft-text">
         <i class="fa-solid fa-xmark"></i>
       </button>
 
-      <h2 class="text-xl font-bold text-craft-text mb-4">Add Craft Item & Video</h2>
+      <h2 class="text-xl font-bold text-craft-text mb-4">Add Product & Type Pricing</h2>
 
-      <form onsubmit="handleSaveProduct(event)" class="space-y-4">
+      <form id="add-product-form" onsubmit="handleSaveProduct(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-bold text-craft-text mb-1">Product Name *</label>
-          <input type="text" id="prod-title" required placeholder="e.g., Crochet Strawberry Bunny" class="w-full px-4 py-2 rounded-xl bg-craft-cream border border-craft-pink text-sm">
+          <input type="text" id="prod-title" required class="w-full px-4 py-2 rounded-xl bg-craft-cream border border-craft-pink text-sm">
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-bold text-craft-text mb-1">Price (VND) *</label>
-            <input type="number" step="0.01" id="prod-price" required placeholder="24.99" class="w-full px-4 py-2 rounded-xl bg-craft-cream border border-craft-pink text-sm">
-          </div>
-          <div>
             <label class="block text-xs font-bold text-craft-text mb-1">Category *</label>
-            <select id="prod-category" required class="w-full px-4 py-2 rounded-xl bg-craft-cream border border-craft-pink text-sm">
+            <select id="prod-category" class="w-full px-4 py-2 rounded-xl bg-craft-cream border border-craft-pink text-sm">
               <option value="Plushies">Plushies</option>
               <option value="Bags">Bags</option>
               <option value="Keychains">Keychains</option>
-              <option value="Pattern">Pattern (DIY)</option>
             </select>
           </div>
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-craft-text mb-1">Image URL *</label>
-          <input type="url" id="prod-image" required placeholder="https://images.unsplash.com/..." class="w-full px-4 py-2 rounded-xl bg-craft-cream border border-craft-pink text-sm">
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-craft-text mb-1">YouTube Video Link (or Embed ID)</label>
-          <input type="text" id="prod-youtube" placeholder="e.g. https://www.youtube.com/watch?v=dQw4w9WgXcQ" class="w-full px-4 py-2 rounded-xl bg-craft-cream border border-craft-pink text-sm">
-          <p class="text-[10px] text-craft-subtle mt-0.5">Paste YouTube link to display tutorial to shoppers.</p>
+          <div>
+            <label class="block text-xs font-bold text-craft-text mb-1">YouTube Video Link (Optional)</label>
+            <input type="url" id="prod-youtube" placeholder="https://youtube.com/..." class="w-full px-4 py-2 rounded-xl bg-craft-cream border border-craft-pink text-sm">
+          </div>
         </div>
 
         <div>
           <label class="block text-xs font-bold text-craft-text mb-1">Description *</label>
-          <textarea id="prod-desc" required rows="3" placeholder="Describe materials, dimensions, and craft details..." class="w-full px-4 py-2 rounded-xl bg-craft-cream border border-craft-pink text-sm"></textarea>
+          <textarea id="prod-desc" required rows="2" class="w-full px-4 py-2 rounded-xl bg-craft-cream border border-craft-pink text-sm"></textarea>
         </div>
 
-        <button type="submit" class="w-full py-3 bg-craft-darkrose text-white rounded-2xl font-bold hover:bg-opacity-90 transition-all text-sm shadow-md">
-          Save Product to Storefront
-        </button>
+        <div class="bg-craft-cream p-4 rounded-2xl border border-craft-pink space-y-3">
+          <h3 class="font-bold text-xs text-craft-text uppercase">Product Types (Comma separated types)</h3>
+          <div>
+            <label class="block text-[11px] text-craft-subtle">Type names (e.g. Green, Blue, DIY Crochet Set)</label>
+            <input type="text" id="opt-types" oninput="renderTypeImageAndPriceInputs()" placeholder="Green, Blue, DIY Crochet Set" class="w-full px-3 py-1.5 rounded-lg bg-white border border-craft-pink text-xs">
+          </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl border border-craft-pink space-y-3">
+          <h3 class="font-bold text-xs text-craft-text uppercase">Assign Image & Price for Each Type</h3>
+          <div id="type-config-container" class="space-y-3">
+            <p class="text-xs text-craft-subtle">Type names above to configure their individual pictures and prices.</p>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-craft-darkrose text-white rounded-2xl font-bold text-sm shadow-md">Save Product</button>
       </form>
     </div>
   </div>
 
-
-  <!-- JavaScript Application Logic -->
+  <!-- SCRIPT -->
   <script>
-    // Initial Seed Data
-    const INITIAL_PRODUCTS = [
-      {
-        id: 'p1',
-        title: 'Chubby Crochet Bear Plushie',
-        price: 28.50,
-        category: 'Plushies',
-        image: 'https://images.unsplash.com/photo-1559454403-b8fb88521f11?auto=format&fit=crop&q=80&w=600',
-        youtube: 'https://www.youtube.com/embed/5qap5aO4i9A',
-        description: 'Soft hand-crocheted plush teddy bear using hypoallergenic chenille yarn. Includes customized ribbon.'
-      },
-      {
-        id: 'p2',
-        title: 'Pastel Daisy Canvas Tote Bag',
-        price: 22.00,
-        category: 'Bags',
-        image: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=600',
-        youtube: 'https://www.youtube.com/embed/5qap5aO4i9A',
-        description: 'Durable organic canvas tote hand-embroidered with cute pastel daisies. Perfect for everyday errands.'
-      },
-      {
-        id: 'p3',
-        title: 'Beaded Strawberry Charm Keychain',
-        price: 12.00,
-        category: 'Keychains',
-        image: 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?auto=format&fit=crop&q=80&w=600',
-        youtube: 'https://www.youtube.com/embed/5qap5aO4i9A',
-        description: 'Aesthetic glass bead keychain featuring handmade acrylic strawberry charms and gold hardware.'
-      },
-      {
-        id: 'p4',
-        title: 'DIY Bunny Frog Plushie Pattern (PDF)',
-        price: 6.50,
-        category: 'Pattern',
-        image: 'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&q=80&w=600',
-        youtube: 'https://www.youtube.com/embed/5qap5aO4i9A',
-        description: 'Step-by-step printable digital crochet pattern with full photo diagrams and video walkthrough.'
-      },
-      {
-        id: 'p5',
-        title: 'Handmade Coaster Set (4 Pack)',
-        price: 18.00,
-        category: 'Plushies',
-        image: 'https://images.unsplash.com/photo-1607344645866-009c320c5ab8?auto=format&fit=crop&q=80&w=600',
-        youtube: 'https://www.youtube.com/embed/5qap5aO4i9A',
-        description: 'Boho style woven coasters to protect your coffee desk. Made with 100% natural cotton cord.'
-      }
-    ];
+    // --- SUPABASE CONFIGURATION ---
+    const SUPABASE_URL = 'https://kchjloxdkshegptdkgtw.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_VnSYQLlqyprGbtouqHRHRw_jVrIRBJx';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const INITIAL_ORDERS = [
-      {
-        id: 'LC-9021',
-        date: '2026-10-28',
-        customer: { name: 'Sarah Jenkins', phone: '+1 555-234-5678', address: '123 Blossom Lane, Seattle WA', notes: 'Leave at front porch' },
-        items: [{ title: 'Chubby Crochet Bear Plushie', qty: 1, price: 28.50 }],
-        total: 32.50,
-        payment: 'COD',
-        status: 'Delivered'
-      },
-      {
-        id: 'LC-9022',
-        date: '2026-10-29',
-        customer: { name: 'Michael Chang', phone: '+1 555-876-5432', address: '456 Oak Street, Austin TX', notes: '' },
-        items: [{ title: 'Beaded Strawberry Charm Keychain', qty: 2, price: 12.00 }],
-        total: 28.00,
-        payment: 'Bank QR',
-        status: 'Pending'
-      }
-    ];
+    let products = [];
+    let cart = JSON.parse(localStorage.getItem('littlecraft_cart')) || [];
+    let orders = [];
+    let isAdminLoggedIn = localStorage.getItem('littlecraft_admin') === 'true';
+    let currentFilter = 'All';
+    let currentActiveProduct = null;
+    let tempTypeImages = {};
 
-    // App State Management
-    let products = JSON.parse(localStorage.getItem('lc_products')) || INITIAL_PRODUCTS;
-    let orders = JSON.parse(localStorage.getItem('lc_orders')) || INITIAL_ORDERS;
-    let cart = JSON.parse(localStorage.getItem('lc_cart')) || [];
-    let currentCategory = 'All';
-    let isAdminLoggedIn = false;
-    let activeModalProductId = null;
+    window.addEventListener('DOMContentLoaded', async () => {
+      renderCategoryPills();
+      await fetchProductsFromSupabase();
+      await fetchOrdersFromSupabase();
+      updateCartUI();
+      updateAdminNavButton();
+    });
 
-    // Save helpers
-    function saveState() {
-      localStorage.setItem('lc_products', JSON.stringify(products));
-      localStorage.setItem('lc_orders', JSON.stringify(orders));
-      localStorage.setItem('lc_cart', JSON.stringify(cart));
+    function formatVND(amount) {
+      return new Intl.NumberFormat('vi-VN').format(amount) + '₫';
     }
 
-    // Initialize App
-    window.onload = function() {
-      renderCategoryPills();
-      renderProducts();
-      updateCartUI();
-      renderAdminOrders();
-      renderAdminInventory();
-      updateAdminStats();
-    };
+    async function fetchProductsFromSupabase() {
+      const { data, error } = await supabaseClient.from('products').select('*').order('created_at', { ascending: false });
+      if (error) {
+        console.error('Error fetching products:', error);
+      } else {
+        products = data || [];
+        renderProducts();
+        if (isAdminLoggedIn) loadAdminData();
+      }
+    }
 
-    // Navigation Switches
+    async function fetchOrdersFromSupabase() {
+      const { data, error } = await supabaseClient.from('orders').select('*').order('created_at', { ascending: false });
+      if (error) {
+        console.error('Error fetching orders:', error);
+      } else {
+        orders = data || [];
+        if (isAdminLoggedIn) loadAdminData();
+      }
+    }
+
     function showSection(section) {
       const storeSec = document.getElementById('store-section');
       const adminSec = document.getElementById('admin-section');
-      const navStoreBtn = document.getElementById('nav-store-btn');
+      const storeBtn = document.getElementById('nav-store-btn');
 
-      if (section === 'store') {
+      if(section === 'store') {
         storeSec.classList.remove('hidden');
         adminSec.classList.add('hidden');
-        navStoreBtn.classList.add('hidden');
-      } else if (section === 'admin') {
-        if (!isAdminLoggedIn) {
-          openAdminLoginModal();
-          return;
-        }
+        storeBtn.classList.add('hidden');
+        renderProducts();
+      } else if(section === 'admin') {
+        if(!isAdminLoggedIn) { openAdminLoginModal(); return; }
         storeSec.classList.add('hidden');
         adminSec.classList.remove('hidden');
-        navStoreBtn.classList.remove('hidden');
-        renderAdminOrders();
-        renderAdminInventory();
-        updateAdminStats();
+        storeBtn.classList.remove('hidden');
+        loadAdminData();
       }
     }
 
     function handleAdminNav() {
-      if (isAdminLoggedIn) {
-        showSection('admin');
-      } else {
-        openAdminLoginModal();
-      }
+      if(isAdminLoggedIn) showSection('admin');
+      else openAdminLoginModal();
     }
 
-    // Category Pill Rendering
     function renderCategoryPills() {
-      const categories = ['All', 'Plushies', 'Bags', 'Keychains', 'Pattern'];
-      const container = document.getElementById('category-pills');
-      container.innerHTML = categories.map(cat => `
-        <button onclick="filterCategory('${cat}')" 
-                class="px-4 py-2 rounded-2xl text-xs font-bold transition-all whitespace-nowrap ${currentCategory === cat ? 'bg-craft-darkrose text-white shadow-sm' : 'bg-white text-craft-text hover:bg-craft-pink border border-craft-pink'}">
-          ${cat}
-        </button>
+      const categories = ['All', 'Plushies', 'Bags', 'Keychains'];
+      document.getElementById('category-pills').innerHTML = categories.map(cat => `
+        <button onclick="currentFilter='${cat}'; renderCategoryPills(); renderProducts();" class="px-5 py-2 rounded-2xl text-xs font-bold transition-all ${currentFilter === cat ? 'bg-craft-darkrose text-white shadow-md' : 'bg-white text-craft-text hover:bg-craft-pink border border-craft-pink'}">${cat}</button>
       `).join('');
     }
 
-    function filterCategory(cat) {
-      currentCategory = cat;
-      renderCategoryPills();
-      renderProducts();
-    }
+    function handleSearch() { renderProducts(); }
 
-    function handleSearch() {
-      renderProducts();
-    }
-
-    // Render Product Cards
     function renderProducts() {
       const grid = document.getElementById('product-grid');
       const emptyState = document.getElementById('empty-store-state');
-      const searchQuery = document.getElementById('search-input').value.toLowerCase();
+      const query = document.getElementById('search-input').value.toLowerCase();
 
-      const filtered = products.filter(p => {
-        const matchesCategory = (currentCategory === 'All' || p.category === currentCategory);
-        const matchesSearch = p.title.toLowerCase().includes(searchQuery) || p.description.toLowerCase().includes(searchQuery);
-        return matchesCategory && matchesSearch;
-      });
+      const filtered = products.filter(p => (currentFilter === 'All' || p.category === currentFilter) && p.title.toLowerCase().includes(query));
 
-      if (filtered.length === 0) {
+      if(filtered.length === 0) {
         grid.innerHTML = '';
         emptyState.classList.remove('hidden');
         return;
       }
-
       emptyState.classList.add('hidden');
-      grid.innerHTML = filtered.map(product => `
-        <div class="craft-card bg-white rounded-3xl border border-craft-pink overflow-hidden shadow-sm hover:shadow-md flex flex-col justify-between">
-          <div>
-            <!-- Image & Badge -->
-            <div class="relative h-52 bg-craft-cream overflow-hidden">
-              <img src="${product.image}" alt="${product.title}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105" onerror="this.src='https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&q=80&w=600'">
-              <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-xs text-craft-darkrose text-[11px] font-bold px-3 py-1 rounded-full border border-craft-pink shadow-xs">
-                ${product.category}
-              </span>
-              ${product.youtube ? `
-                <button onclick="openProductModal('${product.id}')" class="absolute bottom-3 right-3 bg-red-600/90 hover:bg-red-600 text-white text-xs font-bold px-2.5 py-1.5 rounded-xl shadow flex items-center gap-1.5 backdrop-blur-xs">
-                  <i class="fa-brands fa-youtube"></i> Tutorial
-                </button>
-              ` : ''}
-            </div>
 
-            <!-- Body -->
-            <div class="p-5">
-              <h3 onclick="openProductModal('${product.id}')" class="font-bold text-craft-text text-base hover:text-craft-darkrose cursor-pointer transition-colors line-clamp-1 mb-1">${product.title}</h3>
-              <p class="text-craft-subtle text-xs line-clamp-2 mb-3 leading-relaxed">${product.description}</p>
-              <div class="text-xl font-extrabold text-craft-darkrose">$${product.price.toFixed(2)}</div>
+      grid.innerHTML = filtered.map(p => {
+        const coverImg = (p.types && p.types.length > 0) ? p.types[0].url : 'https://via.placeholder.com/300';
+        const minPrice = (p.types && p.types.length > 0) ? Math.min(...p.types.map(t => t.price)) : 0;
+        return `
+          <div onclick="openProductModal(${p.id})" class="craft-card bg-white rounded-3xl border border-craft-pink overflow-hidden shadow-sm cursor-pointer flex flex-col justify-between group">
+            <div class="relative overflow-hidden aspect-square bg-craft-cream">
+              <img src="${coverImg}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+              <span class="absolute top-3 left-3 px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-bold text-craft-darkrose">${p.category}</span>
+            </div>
+            <div class="p-5 flex flex-col flex-grow justify-between">
+              <div>
+                <h3 class="font-heading font-bold text-craft-text text-base mb-1">${p.title}</h3>
+                <p class="text-xs text-craft-subtle line-clamp-2 mb-4">${p.description}</p>
+              </div>
+              <div class="flex items-center justify-between pt-3 border-t border-craft-pink/40">
+                <span class="text-base font-extrabold text-craft-darkrose">From ${formatVND(minPrice)}</span>
+                <span class="text-xs font-bold text-craft-darksage bg-craft-sage px-3 py-1 rounded-xl">Select Type</span>
+              </div>
             </div>
           </div>
-
-          <!-- Actions -->
-          <div class="p-5 pt-0 flex items-center gap-2">
-            <button onclick="addToCart('${product.id}')" class="flex-1 py-2.5 bg-craft-pink text-craft-text hover:bg-craft-rose hover:text-white rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-1.5">
-              <i class="fa-solid fa-basket-shopping"></i> Add to Basket
-            </button>
-            <button openProductModal('${product.id}')" onclick="quickBuyNow('${product.id}')" class="py-2.5 px-3 bg-craft-darkrose text-white hover:bg-opacity-90 rounded-2xl text-xs font-bold transition-all shadow-sm">
-              Buy Now
-            </button>
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
-    // Product Modal & Youtube Embed Embedder Helper
     function openProductModal(id) {
       const product = products.find(p => p.id === id);
-      if (!product) return;
+      if(!product) return;
+      currentActiveProduct = product;
 
-      activeModalProductId = id;
-      document.getElementById('modal-img').src = product.image;
-      document.getElementById('modal-title').innerText = product.title;
-      document.getElementById('modal-category').innerText = product.category;
-      document.getElementById('modal-price').innerText = `$${product.price.toFixed(2)}`;
-      document.getElementById('modal-desc').innerText = product.description;
+      document.getElementById('modal-title').textContent = product.title;
+      document.getElementById('modal-category').textContent = product.category;
+      document.getElementById('modal-desc').textContent = product.description;
 
-      // Handle Youtube link conversion
+      const initialImg = (product.types && product.types.length > 0) ? product.types[0].url : 'https://via.placeholder.com/300';
+      const initialPrice = (product.types && product.types.length > 0) ? product.types[0].price : 0;
+
+      document.getElementById('modal-price').textContent = formatVND(initialPrice);
+
+      document.getElementById('modal-img-container').innerHTML = `
+        <div class="mb-3"><img id="modal-main-img" src="${initialImg}" class="w-full h-72 object-cover rounded-2xl border border-craft-pink shadow-sm"></div>
+        <div class="flex gap-2 overflow-x-auto pb-2">
+          ${product.types.map(t => `<img src="${t.url}" onclick="selectProductType('${t.name}')" class="w-16 h-16 object-cover rounded-xl border-2 cursor-pointer hover:border-craft-darkrose border-craft-pink">`).join('')}
+        </div>
+      `;
+
+      const optContainer = document.getElementById('modal-options-container');
+      if(product.types && product.types.length > 0) {
+        optContainer.innerHTML = `
+          <div>
+            <label class="block text-xs font-bold text-craft-text mb-1">Choose Type / Option</label>
+            <select id="selected-type-dropdown" onchange="selectProductType(this.value)" class="w-full p-2.5 bg-white rounded-xl border border-craft-pink text-xs font-bold">
+              ${product.types.map(t => `<option value="${t.name}" data-price="${t.price}" data-url="${t.url}">${t.name} - ${formatVND(t.price)}</option>`).join('')}
+            </select>
+          </div>
+        `;
+      } else {
+        optContainer.innerHTML = '<p class="text-xs text-craft-subtle">No options configured.</p>';
+      }
+
       const videoContainer = document.getElementById('modal-video-container');
       const iframe = document.getElementById('modal-youtube-iframe');
-
-      if (product.youtube) {
-        let embedUrl = product.youtube;
-        if (embedUrl.includes('watch?v=')) {
-          const videoId = embedUrl.split('watch?v=')[1].split('&')[0];
-          embedUrl = `https://www.youtube.com/embed/${videoId}`;
-        } else if (!embedUrl.includes('embed/')) {
-          const videoId = embedUrl.split('/').pop();
-          embedUrl = `https://www.youtube.com/embed/${videoId}`;
-        }
+      if(product.youtube_url) {
+        let embedUrl = product.youtube_url;
+        if(embedUrl.includes('watch?v=')) embedUrl = embedUrl.replace('watch?v=', 'embed/');
         iframe.src = embedUrl;
         videoContainer.classList.remove('hidden');
       } else {
@@ -830,341 +511,293 @@
         videoContainer.classList.add('hidden');
       }
 
-      document.getElementById('modal-add-cart-btn').onclick = () => {
-        addToCart(product.id);
-        closeProductModal();
-      };
-      document.getElementById('modal-buy-now-btn').onclick = () => {
-        closeProductModal();
-        quickBuyNow(product.id);
-      };
-
       const modal = document.getElementById('product-modal');
       modal.classList.remove('hidden');
       setTimeout(() => modal.classList.remove('opacity-0'), 10);
     }
 
+    function selectProductType(typeName) {
+      if(!currentActiveProduct || !currentActiveProduct.types) return;
+      const matched = currentActiveProduct.types.find(t => t.name.toLowerCase() === typeName.toLowerCase());
+      if(matched) {
+        document.getElementById('modal-main-img').src = matched.url;
+        document.getElementById('modal-price').textContent = formatVND(matched.price);
+        const dropdown = document.getElementById('selected-type-dropdown');
+        if(dropdown) dropdown.value = matched.name;
+      }
+    }
+
     function closeProductModal() {
       const modal = document.getElementById('product-modal');
-      document.getElementById('modal-youtube-iframe').src = '';
       modal.classList.add('opacity-0');
+      document.getElementById('modal-youtube-iframe').src = '';
       setTimeout(() => modal.classList.add('hidden'), 300);
     }
 
-    // Shopping Cart Operations
-    function addToCart(productId) {
-      const existing = cart.find(item => item.id === productId);
-      if (existing) {
-        existing.qty += 1;
-      } else {
-        const product = products.find(p => p.id === productId);
-        cart.push({ id: product.id, title: product.title, price: product.price, image: product.image, qty: 1 });
-      }
-      saveState();
+    function addCustomizedToCart() {
+      const dropdown = document.getElementById('selected-type-dropdown');
+      if(!dropdown || !dropdown.selectedOptions[0]) return;
+
+      const chosenTypeName = dropdown.value;
+      const chosenPrice = parseFloat(dropdown.selectedOptions[0].getAttribute('data-price'));
+      const chosenImg = dropdown.selectedOptions[0].getAttribute('data-url');
+
+      cart.push({
+        ...currentActiveProduct,
+        cartId: Date.now(),
+        qty: 1,
+        cartPrice: chosenPrice,
+        cartImage: chosenImg,
+        selectedType: chosenTypeName
+      });
+
+      localStorage.setItem('littlecraft_cart', JSON.stringify(cart));
       updateCartUI();
-      showToast('Added to craft basket!');
+      closeProductModal();
+      showToast('Added to basket!');
     }
 
-    function updateCartQty(productId, change) {
-      const index = cart.findIndex(item => item.id === productId);
-      if (index !== -1) {
-        cart[index].qty += change;
-        if (cart[index].qty <= 0) {
-          cart.splice(index, 1);
-        }
-      }
-      saveState();
+    function buyNowAction() {
+      const dropdown = document.getElementById('selected-type-dropdown');
+      if(!dropdown || !dropdown.selectedOptions[0]) return;
+
+      const chosenTypeName = dropdown.value;
+      const chosenPrice = parseFloat(dropdown.selectedOptions[0].getAttribute('data-price'));
+      const chosenImg = dropdown.selectedOptions[0].getAttribute('data-url');
+
+      cart.push({
+        ...currentActiveProduct,
+        cartId: Date.now(),
+        qty: 1,
+        cartPrice: chosenPrice,
+        cartImage: chosenImg,
+        selectedType: chosenTypeName
+      });
+
+      localStorage.setItem('littlecraft_cart', JSON.stringify(cart));
       updateCartUI();
+      closeProductModal();
+      toggleCartModal(true);
+    }
+
+    async function checkoutOrder() {
+      if(cart.length === 0) {
+        alert('Your cart is empty!');
+        return;
+      }
+
+      const orderId = 'ORD-' + Math.floor(100000 + Math.random() * 900000);
+      const totalPrice = cart.reduce((sum, item) => sum + item.cartPrice, 0);
+
+      const { data, error } = await supabaseClient.from('orders').insert([
+        {
+          id: orderId,
+          items: cart,
+          total_price: totalPrice
+        }
+      ]);
+
+      if (error) {
+        alert('Error saving order to Supabase: ' + error.message);
+      } else {
+        cart = [];
+        localStorage.removeItem('littlecraft_cart');
+        updateCartUI();
+        toggleCartModal(false);
+        showToast('Order placed successfully!');
+        await fetchOrdersFromSupabase();
+      }
     }
 
     function updateCartUI() {
       const badge = document.getElementById('cart-badge');
       const container = document.getElementById('cart-items-container');
-      const checkoutBtn = document.getElementById('checkout-btn');
+      const totalEl = document.getElementById('cart-total');
 
-      const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
-      const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+      badge.textContent = cart.length;
+      if(cart.length > 0) badge.classList.remove('scale-0');
+      else badge.classList.add('scale-0');
 
-      badge.innerText = totalItems;
-      if (totalItems > 0) {
-        badge.classList.remove('scale-0');
-        checkoutBtn.disabled = false;
-      } else {
-        badge.classList.add('scale-0');
-        checkoutBtn.disabled = true;
-      }
-
-      document.getElementById('cart-subtotal').innerText = `$${subtotal.toFixed(2)}`;
-      document.getElementById('cart-total').innerText = `$${subtotal.toFixed(2)}`;
-
-      if (cart.length === 0) {
-        container.innerHTML = `
-          <div class="text-center py-12">
-            <i class="fa-solid fa-basket-shopping text-4xl text-craft-pink mb-3"></i>
-            <p class="text-craft-subtle font-medium text-sm">Your basket is currently empty.</p>
+      let total = 0;
+      container.innerHTML = cart.map(item => {
+        total += item.cartPrice;
+        return `
+          <div class="flex items-center gap-4 bg-white p-4 rounded-2xl border border-craft-pink shadow-sm">
+            <img src="${item.cartImage}" class="w-14 h-14 object-cover rounded-xl border">
+            <div class="flex-grow">
+              <h4 class="font-bold text-craft-text text-sm">${item.title}</h4>
+              <p class="text-[11px] text-craft-subtle">Type: ${item.selectedType}</p>
+              <p class="text-craft-darkrose font-bold text-xs mt-1">${formatVND(item.cartPrice)}</p>
+            </div>
+            <button onclick="cart = cart.filter(i => i.cartId !== ${item.cartId}); localStorage.setItem('littlecraft_cart', JSON.stringify(cart)); updateCartUI();" class="text-craft-subtle hover:text-rose-500"><i class="fa-solid fa-trash-can"></i></button>
           </div>
         `;
-        return;
-      }
-
-      container.innerHTML = cart.map(item => `
-        <div class="flex items-center gap-3 bg-white p-3 rounded-2xl border border-craft-pink shadow-xs">
-          <img src="${item.image}" alt="" class="w-14 h-14 object-cover rounded-xl border border-craft-pink">
-          <div class="flex-grow">
-            <h4 class="font-bold text-xs text-craft-text line-clamp-1">${item.title}</h4>
-            <p class="text-xs text-craft-darkrose font-bold">$${(item.price * item.qty).toFixed(2)}</p>
-            <div class="flex items-center gap-2 mt-1">
-              <button onclick="updateCartQty('${item.id}', -1)" class="w-5 h-5 bg-craft-pink rounded-full text-xs font-bold flex items-center justify-center">-</button>
-              <span class="text-xs font-bold">${item.qty}</span>
-              <button onclick="updateCartQty('${item.id}', 1)" class="w-5 h-5 bg-craft-pink rounded-full text-xs font-bold flex items-center justify-center">+</button>
-            </div>
-          </div>
-          <button onclick="updateCartQty('${item.id}', -${item.qty})" class="text-craft-subtle hover:text-red-500 p-2">
-            <i class="fa-solid fa-trash text-xs"></i>
-          </button>
-        </div>
-      `).join('');
+      }).join('');
+      totalEl.textContent = formatVND(total);
     }
 
     function toggleCartModal(open) {
       const backdrop = document.getElementById('cart-backdrop');
       const panel = document.getElementById('cart-panel');
-
-      if (open) {
-        backdrop.classList.remove('hidden');
-        setTimeout(() => {
-          backdrop.classList.remove('opacity-0');
-          panel.classList.remove('translate-x-full');
-        }, 10);
+      if(open) {
+        backdrop.classList.remove('hidden', 'opacity-0');
+        panel.classList.remove('translate-x-full');
       } else {
         backdrop.classList.add('opacity-0');
         panel.classList.add('translate-x-full');
-        setTimeout(() => {
-          backdrop.classList.add('hidden');
-        }, 300);
+        setTimeout(() => backdrop.classList.add('hidden'), 300);
       }
     }
 
-    // Express Checkout Flow
-    function quickBuyNow(productId) {
-      addToCart(productId);
-      toggleCartModal(false);
-      openCheckoutModal();
-    }
-
-    function openCheckoutModal() {
-      toggleCartModal(false);
-      const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
-      const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-      const total = subtotal + 4.00; // Flat shipping
-
-      document.getElementById('checkout-count').innerText = `${totalItems} item(s)`;
-      document.getElementById('checkout-total').innerText = `$${total.toFixed(2)}`;
-
-      const modal = document.getElementById('checkout-modal');
-      modal.classList.remove('hidden');
-      setTimeout(() => modal.classList.remove('opacity-0'), 10);
-    }
-
-    function closeCheckoutModal() {
-      const modal = document.getElementById('checkout-modal');
-      modal.classList.add('opacity-0');
-      setTimeout(() => modal.classList.add('hidden'), 300);
-    }
-
-    function updatePaymentView() {
-      const selected = document.querySelector('input[name="payment_method"]:checked').value;
-      const qrBox = document.getElementById('qr-payment-info');
-      if (selected === 'Bank QR') {
-        qrBox.classList.remove('hidden');
-      } else {
-        qrBox.classList.add('hidden');
-      }
-    }
-
-    function handlePlaceOrder(e) {
-      e.preventDefault();
-      const name = document.getElementById('cust-name').value;
-      const phone = document.getElementById('cust-phone').value;
-      const address = document.getElementById('cust-address').value;
-      const notes = document.getElementById('cust-notes').value;
-      const payment = document.querySelector('input[name="payment_method"]:checked').value;
-
-      const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-      const total = subtotal + 4.00;
-      const orderId = `LC-${Math.floor(1000 + Math.random() * 9000)}`;
-
-      const newOrder = {
-        id: orderId,
-        date: new Date().toISOString().split('T')[0],
-        customer: { name, phone, address, notes },
-        items: [...cart],
-        total: total,
-        payment: payment,
-        status: 'Pending'
-      };
-
-      orders.unshift(newOrder);
-      cart = [];
-      saveState();
-      updateCartUI();
-
-      closeCheckoutModal();
-
-      // Show Success Modal
-      document.getElementById('success-order-id').innerText = `#${orderId}`;
-      document.getElementById('success-cust-name').innerText = name;
-      document.getElementById('success-cust-phone').innerText = phone;
-      document.getElementById('success-payment-type').innerText = payment;
-
-      const successModal = document.getElementById('success-modal');
-      successModal.classList.remove('hidden');
-    }
-
-    function closeSuccessModal() {
-      document.getElementById('success-modal').classList.add('hidden');
-      showToast('Order received successfully!');
-    }
-
-    // Admin Controls & Auth
-    function openAdminLoginModal() {
-      const modal = document.getElementById('admin-login-modal');
-      modal.classList.remove('hidden');
-      setTimeout(() => modal.classList.remove('opacity-0'), 10);
-    }
-
-    function closeAdminLoginModal() {
-      const modal = document.getElementById('admin-login-modal');
-      modal.classList.add('opacity-0');
-      setTimeout(() => modal.classList.add('hidden'), 300);
-    }
+    function openAdminLoginModal() { document.getElementById('admin-login-modal').classList.remove('hidden', 'opacity-0'); }
+    function closeAdminLoginModal() { document.getElementById('admin-login-modal').classList.add('opacity-0'); setTimeout(()=>document.getElementById('admin-login-modal').classList.add('hidden'), 300); }
 
     function handleAdminLogin(e) {
       e.preventDefault();
-      const user = document.getElementById('admin-user').value;
-      const pass = document.getElementById('admin-pass').value;
-
-      if (user === 'admin' && pass === 'admin123') {
+      if(document.getElementById('admin-user').value === 'admin' && document.getElementById('admin-pass').value === 'Nguyet9898@@@') {
         isAdminLoggedIn = true;
+        localStorage.setItem('littlecraft_admin', 'true');
         closeAdminLoginModal();
-        document.getElementById('admin-btn-label').innerText = 'Admin Portal (Active)';
         showSection('admin');
-        showToast('Logged in as Admin');
-      } else {
-        alert('Invalid Admin credentials! Use admin / admin123');
-      }
+      } else alert('Incorrect login!');
     }
 
     function logoutAdmin() {
       isAdminLoggedIn = false;
-      document.getElementById('admin-btn-label').innerText = 'Admin Portal';
+      localStorage.removeItem('littlecraft_admin');
       showSection('store');
-      showToast('Logged out of Admin');
     }
 
-    function switchAdminTab(tab) {
-      const ordersTab = document.getElementById('admin-tab-orders');
-      const invTab = document.getElementById('admin-tab-inventory');
-      const btnOrders = document.getElementById('tab-btn-orders');
-      const btnInv = document.getElementById('tab-btn-inventory');
+    function updateAdminNavButton() {
+      document.getElementById('admin-btn-label').textContent = isAdminLoggedIn ? 'Admin Dashboard' : 'Admin Portal';
+    }
 
-      if (tab === 'orders') {
-        ordersTab.classList.remove('hidden');
-        invTab.classList.add('hidden');
-        btnOrders.className = 'pb-3 text-sm font-bold border-b-2 border-craft-darkrose text-craft-darkrose';
-        btnInv.className = 'pb-3 text-sm font-bold text-craft-subtle hover:text-craft-text border-b-2 border-transparent';
-      } else {
-        ordersTab.classList.add('hidden');
-        invTab.classList.remove('hidden');
-        btnInv.className = 'pb-3 text-sm font-bold border-b-2 border-craft-darkrose text-craft-darkrose';
-        btnOrders.className = 'pb-3 text-sm font-bold text-craft-subtle hover:text-craft-text border-b-2 border-transparent';
+    function loadAdminData() {
+      // Products Table
+      const tableBody = document.getElementById('admin-inventory-table');
+      if(tableBody) {
+        if(!products || products.length === 0) {
+          tableBody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-craft-subtle text-xs">No products found in database.</td></tr>`;
+        } else {
+          tableBody.innerHTML = products.map(p => {
+            const firstImg = (p.types && p.types.length > 0) ? p.types[0].url : 'https://via.placeholder.com/150';
+            const typeDetails = (p.types && p.types.length > 0) ? p.types.map(t => `<strong>${t.name}</strong>: ${formatVND(t.price)}`).join('<br>') : 'No types configured';
+            return `
+              <tr class="hover:bg-craft-pink/10 border-b border-craft-pink/30">
+                <td class="p-4 flex items-center gap-3">
+                  <img src="${firstImg}" class="w-12 h-12 object-cover rounded-xl border">
+                  <span class="font-bold text-craft-text">${p.title}</span>
+                </td>
+                <td class="p-4 text-xs">${p.category}</td>
+                <td class="p-4 text-xs text-craft-subtle leading-relaxed">
+                  ${typeDetails}
+                </td>
+                <td class="p-4 text-right">
+                  <button onclick="deleteProduct(${p.id})" class="px-3 py-1 bg-rose-50 text-rose-500 rounded-xl text-xs font-bold hover:bg-rose-100 transition-colors"><i class="fa-solid fa-trash"></i></button>
+                </td>
+              </tr>
+            `;
+          }).join('');
+        }
+      }
+
+      // Orders Table
+      const ordersBody = document.getElementById('admin-orders-table');
+      if(ordersBody) {
+        if(!orders || orders.length === 0) {
+          ordersBody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-craft-subtle text-xs">No customer orders yet.</td></tr>`;
+        } else {
+          ordersBody.innerHTML = orders.map(ord => {
+            const dateStr = new Date(ord.created_at).toLocaleString('vi-VN');
+            const itemsList = ord.items.map(i => `${i.qty || 1}x ${i.title} (${i.selectedType})`).join('<br>');
+            return `
+              <tr class="hover:bg-craft-sage/20 border-b border-craft-pink/30">
+                <td class="p-4 text-xs font-bold text-craft-text">
+                  ${ord.id}<br>
+                  <span class="text-[10px] text-craft-subtle font-normal">${dateStr}</span>
+                </td>
+                <td class="p-4 text-xs text-craft-subtle leading-relaxed">${itemsList}</td>
+                <td class="p-4 text-xs font-extrabold text-craft-darkrose">${formatVND(ord.total_price)}</td>
+                <td class="p-4 text-right">
+                  <button onclick="deleteOrder('${ord.id}')" class="px-3 py-1 bg-rose-50 text-rose-500 rounded-xl text-xs font-bold hover:bg-rose-100 transition-colors"><i class="fa-solid fa-trash"></i></button>
+                </td>
+              </tr>
+            `;
+          }).join('');
+        }
       }
     }
 
-    function renderAdminOrders() {
-      const tbody = document.getElementById('admin-orders-table');
-      const emptyState = document.getElementById('empty-orders-state');
+    async function deleteProduct(id) {
+      if(confirm('Are you sure you want to delete this product?')) {
+        const { error } = await supabaseClient.from('products').delete().eq('id', id);
+        if(error) {
+          alert('Error deleting product: ' + error.message);
+        } else {
+          showToast('Product deleted');
+          await fetchProductsFromSupabase();
+        }
+      }
+    }
 
-      if (orders.length === 0) {
-        tbody.innerHTML = '';
-        emptyState.classList.remove('hidden');
+    async function deleteOrder(orderId) {
+      if(confirm('Are you sure you want to delete this order record?')) {
+        const { error } = await supabaseClient.from('orders').delete().eq('id', orderId);
+        if(error) {
+          alert('Error deleting order: ' + error.message);
+        } else {
+          showToast('Order removed');
+          await fetchOrdersFromSupabase();
+        }
+      }
+    }
+
+    function renderTypeImageAndPriceInputs() {
+      const rawTypes = document.getElementById('opt-types').value;
+      const container = document.getElementById('type-config-container');
+      const types = rawTypes ? rawTypes.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+      if(types.length === 0) {
+        container.innerHTML = `<p class="text-xs text-craft-subtle">Type names above to configure their individual pictures and prices.</p>`;
         return;
       }
 
-      emptyState.classList.add('hidden');
-      tbody.innerHTML = orders.map(o => `
-        <tr class="hover:bg-craft-cream/50 transition-colors">
-          <td class="p-4">
-            <span class="font-bold text-craft-darkrose block">#${o.id}</span>
-            <span class="text-xs text-craft-subtle">${o.date}</span>
-          </td>
-          <td class="p-4">
-            <p class="font-bold text-craft-text">${o.customer.name}</p>
-            <p class="text-xs text-craft-subtle">${o.customer.phone}</p>
-            <p class="text-xs text-craft-subtle truncate max-w-xs">${o.customer.address}</p>
-          </td>
-          <td class="p-4">
-            <ul class="text-xs space-y-1">
-              ${o.items.map(i => `<li>• <strong>${i.qty}x</strong> ${i.title}</li>`).join('')}
-            </ul>
-          </td>
-          <td class="p-4">
-            <span class="font-bold text-craft-text block">$${o.total.toFixed(2)}</span>
-            <span class="text-[11px] px-2 py-0.5 rounded bg-craft-pink text-craft-text inline-block">${o.payment}</span>
-          </td>
-          <td class="p-4">
-            <span class="px-3 py-1 rounded-full text-xs font-bold ${
-              o.status === 'Delivered' ? 'bg-emerald-100 text-emerald-800' :
-              o.status === 'Shipped' ? 'bg-sky-100 text-sky-800' : 'bg-amber-100 text-amber-800'
-            }">
-              ${o.status}
-            </span>
-          </td>
-          <td class="p-4 text-right">
-            <select onchange="changeOrderStatus('${o.id}', this.value)" class="text-xs p-1.5 rounded-xl border border-craft-pink bg-white">
-              <option value="Pending" ${o.status === 'Pending' ? 'selected' : ''}>Pending</option>
-              <option value="Shipped" ${o.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
-              <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
-            </select>
-          </td>
-        </tr>
+      container.innerHTML = types.map(typeName => `
+        <div class="p-3 border border-craft-pink rounded-xl bg-craft-cream space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-craft-darkrose">Type: ${typeName}</span>
+            <div id="preview-badge-${typeName}" class="text-[10px] text-craft-subtle bg-white px-2 py-0.5 rounded border">No image</div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[10px] text-craft-subtle mb-0.5">Price (VND)</label>
+              <input type="number" id="type-price-${typeName}" required placeholder="e.g. 56000" class="w-full px-3 py-1.5 rounded-lg bg-white border border-craft-pink text-xs">
+            </div>
+            <div>
+              <label class="block text-[10px] text-craft-subtle mb-0.5">Upload Picture</label>
+              <input type="file" accept="image/*" onchange="handleTypeImageUpload(event, '${typeName}')" class="text-[10px] text-craft-subtle">
+            </div>
+          </div>
+        </div>
       `).join('');
     }
 
-    function changeOrderStatus(orderId, newStatus) {
-      const order = orders.find(o => o.id === orderId);
-      if (order) {
-        order.status = newStatus;
-        saveState();
-        renderAdminOrders();
-        updateAdminStats();
-        showToast(`Order #${orderId} marked as ${newStatus}`);
-      }
-    }
-
-    function renderAdminInventory() {
-      const tbody = document.getElementById('admin-inventory-table');
-      tbody.innerHTML = products.map(p => `
-        <tr class="hover:bg-craft-cream/50 transition-colors">
-          <td class="p-4 flex items-center gap-3">
-            <img src="${p.image}" class="w-10 h-10 object-cover rounded-xl border">
-            <span class="font-bold text-craft-text">${p.title}</span>
-          </td>
-          <td class="p-4"><span class="px-2.5 py-1 bg-craft-pink rounded-full text-xs">${p.category}</span></td>
-          <td class="p-4 font-bold text-craft-darkrose">$${p.price.toFixed(2)}</td>
-          <td class="p-4 text-xs">
-            ${p.youtube ? `<a href="${p.youtube}" target="_blank" class="text-red-600 underline font-bold"><i class="fa-brands fa-youtube"></i> Watch Tutorial</a>` : '<span class="text-craft-subtle">None</span>'}
-          </td>
-          <td class="p-4 text-right">
-            <button onclick="deleteProduct('${p.id}')" class="p-2 text-rose-500 hover:bg-rose-50 rounded-xl transition-colors">
-              <i class="fa-solid fa-trash"></i>
-            </button>
-          </td>
-        </tr>
-      `).join('');
+    function handleTypeImageUpload(e, typeName) {
+      const file = e.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        tempTypeImages[typeName] = ev.target.result;
+        const badge = document.getElementById(`preview-badge-${typeName}`);
+        if(badge) badge.innerHTML = `<img src="${ev.target.result}" class="w-6 h-6 object-cover rounded inline-block mr-1"> Uploaded`;
+      };
+      reader.readAsDataURL(file);
     }
 
     function openAddProductModal() {
+      tempTypeImages = {};
+      document.getElementById('add-product-form').reset();
+      renderTypeImageAndPriceInputs();
       const modal = document.getElementById('add-product-modal');
       modal.classList.remove('hidden');
       setTimeout(() => modal.classList.remove('opacity-0'), 10);
@@ -1176,60 +809,54 @@
       setTimeout(() => modal.classList.add('hidden'), 300);
     }
 
-    function handleSaveProduct(e) {
+    async function handleSaveProduct(e) {
       e.preventDefault();
-      const title = document.getElementById('prod-title').value;
-      const price = parseFloat(document.getElementById('prod-price').value);
-      const category = document.getElementById('prod-category').value;
-      const image = document.getElementById('prod-image').value;
-      const youtube = document.getElementById('prod-youtube').value;
-      const description = document.getElementById('prod-desc').value;
+      const rawTypes = document.getElementById('opt-types').value;
+      const typeNames = rawTypes ? rawTypes.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+      if(typeNames.length === 0) {
+        alert('Please enter at least one type name.');
+        return;
+      }
+
+      const typesList = [];
+      for(let tName of typeNames) {
+        const priceInput = document.getElementById(`type-price-${tName}`);
+        const price = priceInput ? parseFloat(priceInput.value) : 0;
+        const url = tempTypeImages[tName];
+
+        if(!url) {
+          alert(`Please upload an image for type: "${tName}"`);
+          return;
+        }
+
+        typesList.push({ name: tName, price: price, url: url });
+      }
 
       const newProduct = {
-        id: `p_${Date.now()}`,
-        title,
-        price,
-        category,
-        image,
-        youtube,
-        description
+        title: document.getElementById('prod-title').value,
+        category: document.getElementById('prod-category').value,
+        description: document.getElementById('prod-desc').value,
+        youtube_url: document.getElementById('prod-youtube').value,
+        types: typesList
       };
 
-      products.unshift(newProduct);
-      saveState();
-      renderProducts();
-      renderAdminInventory();
-      updateAdminStats();
-      closeAddProductModal();
-      showToast('New craft product added!');
-    }
+      const { data, error } = await supabaseClient.from('products').insert([newProduct]);
 
-    function deleteProduct(id) {
-      if (confirm('Are you sure you want to remove this product?')) {
-        products = products.filter(p => p.id !== id);
-        saveState();
-        renderProducts();
-        renderAdminInventory();
-        updateAdminStats();
-        showToast('Product deleted');
+      if (error) {
+        alert('Error saving product to Supabase: ' + error.message);
+      } else {
+        closeAddProductModal();
+        showToast('Product saved successfully to Supabase!');
+        await fetchProductsFromSupabase();
       }
     }
 
-    function updateAdminStats() {
-      const totalRev = orders.reduce((sum, o) => sum + o.total, 0);
-      document.getElementById('stat-revenue').innerText = `$${totalRev.toFixed(2)}`;
-      document.getElementById('stat-orders').innerText = orders.length;
-      document.getElementById('stat-products').innerText = products.length;
-    }
-
-    // Toast Alert Helper
-    function showToast(message) {
+    function showToast(msg) {
       const toast = document.getElementById('toast');
-      document.getElementById('toast-message').innerText = message;
-      toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
-      setTimeout(() => {
-        toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
-      }, 2500);
+      document.getElementById('toast-message').textContent = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
     }
   </script>
 </body>
