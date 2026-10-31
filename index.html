@@ -183,10 +183,14 @@
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="bg-craft-sage/40 text-craft-text text-xs uppercase font-bold tracking-wider border-b border-craft-pink">
-                <th class="p-4">Order ID & Date</th>
-                <th class="p-4">Items Ordered</th>
-                <th class="p-4">Total Amount</th>
-                <th class="p-4 text-right">Action</th>
+                
+<th class="p-4">Order ID & Date</th>
+<th class="p-4">Customer Information</th>
+<th class="p-4">Items Ordered</th>
+<th class="p-4">Payment Method</th>
+<th class="p-4">Total Amount</th>
+<th class="p-4 text-right">Action</th>
+
               </tr>
             </thead>
             <tbody id="admin-orders-table" class="divide-y divide-craft-pink/30 text-sm"></tbody>
@@ -725,6 +729,94 @@ function checkoutOrder() {
     .classList.remove('hidden');
 }
 
+
+async function placeOrder(event) {
+  event.preventDefault();
+
+  if (cart.length === 0) {
+    alert('Your cart is empty!');
+    closeCheckoutModal();
+    return;
+  }
+
+  const customerName =
+    document.getElementById('customer-name').value.trim();
+
+  const customerEmail =
+    document.getElementById('customer-email').value.trim();
+
+  const customerPhone =
+    document.getElementById('customer-phone').value.trim();
+
+  const customerAddress =
+    document.getElementById('customer-address').value.trim();
+
+  const paymentMethod =
+    document.querySelector(
+      'input[name="payment-method"]:checked'
+    )?.value;
+
+  if (!customerName || !customerEmail ||
+      !customerPhone || !customerAddress || !paymentMethod) {
+    alert('Please complete all required information.');
+    return;
+  }
+
+  const orderId =
+    'ORD-' + Math.floor(100000 + Math.random() * 900000);
+
+  const totalPrice = cart.reduce(
+    (sum, item) => sum + item.cartPrice * (item.qty || 1),
+    0
+  );
+
+  const button = document.getElementById('place-order-btn');
+  button.disabled = true;
+  button.textContent = 'Processing...';
+
+  try {
+    const { error } = await supabaseClient
+      .from('orders')
+      .insert([{
+        id: orderId,
+        items: cart,
+        total_price: totalPrice,
+
+        customer_name: customerName,
+        customer_email: customerEmail,
+        customer_phone: customerPhone,
+        delivery_address: customerAddress,
+        payment_method: paymentMethod
+      }]);
+
+    if (error) {
+      throw error;
+    }
+
+    // Clear cart only after successful order creation
+    cart = [];
+    localStorage.removeItem('littlecraft_cart');
+
+    updateCartUI();
+    closeCheckoutModal();
+
+    document.getElementById('checkout-form').reset();
+
+    showToast('Your order has been placed successfully! 💗');
+
+    await fetchOrdersFromSupabase();
+
+  } catch (error) {
+    console.error('Order error:', error);
+    alert('Unable to place your order: ' + error.message);
+
+  } finally {
+    button.disabled = false;
+    button.textContent = 'Confirm & Place Order';
+  }
+}
+
+
 function closeCheckoutModal() {
   document.getElementById('checkout-modal')
     .classList.add('hidden');
@@ -829,23 +921,55 @@ function closeCheckoutModal() {
         if(!orders || orders.length === 0) {
           ordersBody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-craft-subtle text-xs">No customer orders yet.</td></tr>`;
         } else {
-          ordersBody.innerHTML = orders.map(ord => {
-            const dateStr = new Date(ord.created_at).toLocaleString('vi-VN');
-            const itemsList = ord.items.map(i => `${i.qty || 1}x ${i.title} (${i.selectedType})`).join('<br>');
-            return `
-              <tr class="hover:bg-craft-sage/20 border-b border-craft-pink/30">
-                <td class="p-4 text-xs font-bold text-craft-text">
-                  ${ord.id}<br>
-                  <span class="text-[10px] text-craft-subtle font-normal">${dateStr}</span>
-                </td>
-                <td class="p-4 text-xs text-craft-subtle leading-relaxed">${itemsList}</td>
-                <td class="p-4 text-xs font-extrabold text-craft-darkrose">${formatVND(ord.total_price)}</td>
-                <td class="p-4 text-right">
-                  <button onclick="deleteOrder('${ord.id}')" class="px-3 py-1 bg-rose-50 text-rose-500 rounded-xl text-xs font-bold hover:bg-rose-100 transition-colors"><i class="fa-solid fa-trash"></i></button>
-                </td>
-              </tr>
-            `;
-          }).join('');
+        
+ordersBody.innerHTML = orders.map(ord => {
+  const dateStr = new Date(ord.created_at).toLocaleString('vi-VN');
+
+  const itemsList = ord.items.map(i =>
+    `${i.qty || 1}x ${i.title} (${i.selectedType})`
+  ).join('<br>');
+
+  return `
+    <tr class="hover:bg-craft-sage/20 border-b border-craft-pink/30">
+
+      <td class="p-4 text-xs font-bold">
+        ${ord.id}<br>
+        <span class="text-[10px] text-craft-subtle font-normal">
+          ${dateStr}
+        </span>
+      </td>
+
+      <td class="p-4 text-xs leading-relaxed">
+        <strong>${ord.customer_name || '-'}</strong><br>
+        ${ord.customer_email || '-'}<br>
+        ${ord.customer_phone || '-'}<br>
+        ${ord.delivery_address || '-'}
+      </td>
+
+      <td class="p-4 text-xs text-craft-subtle leading-relaxed">
+        ${itemsList}
+      </td>
+
+      <td class="p-4 text-xs font-bold">
+        ${ord.payment_method || '-'}
+      </td>
+
+      <td class="p-4 text-xs font-extrabold text-craft-darkrose">
+        ${formatVND(ord.total_price)}
+      </td>
+
+      <td class="p-4 text-right">
+        <button onclick="deleteOrder('${ord.id}')"
+          class="px-3 py-1 bg-rose-50 text-rose-500 rounded-xl
+                 text-xs font-bold hover:bg-rose-100">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </td>
+
+    </tr>
+  `;
+}).join('');
+
         }
       }
     }
